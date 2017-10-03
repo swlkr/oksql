@@ -1,3 +1,5 @@
+-- items.sql
+
 -- name: all
 -- Gets all of the items
 select *
@@ -5,14 +7,14 @@ from items
 order by created_at desc
 
 -- name: fetch
--- f: first
+-- fn: first
 -- Gets a single item
 select *
 from items
 where id = :id
 
 -- name: insert
--- f: first
+-- fn: first
 insert into items (
   id,
   name,
@@ -26,14 +28,14 @@ values (
 returning *
 
 -- name: update
--- f: first
+-- fn: first
 update items
 set name = :name
 where id = :id
 returning *
 
 -- name: delete
--- f: first
+-- fn: first
 delete
 from items
 where id = :id
