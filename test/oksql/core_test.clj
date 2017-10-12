@@ -18,7 +18,10 @@
 
   (testing "mismatched parameters exception"
     (is (thrown-with-msg? Exception #"Parameter mismatch. Expected :id. Got :item-id"
-          (sql-vec "select * from items where id = :id" {:item-id 123})))))
+          (sql-vec "select * from items where id = :id" {:item-id 123}))))
+
+  (testing "ignore more keys just use keys from sql statement"
+    (is (= ["select * from items where id = ?" 321] (sql-vec "select * from items where id = :id" {:item-id 123 :id 321})))))
 
 (defn exec [db sql]
   (jdbc/with-db-connection [conn db]

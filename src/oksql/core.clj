@@ -8,9 +8,9 @@
 (defn sql-vec [sql m]
   (when (and (string? sql)
              (map? m))
-    (let [sql-ks (map #(-> % second keyword) (re-seq #":(\w+)" sql))
+    (let [sql-ks (mapv #(-> % second keyword) (re-seq #":(\w+)" sql))
           params (map #(get m %) sql-ks)
-          diff (clojure.set/difference (set sql-ks) (set (keys m)))
+          diff (clojure.set/difference (set sql-ks) (set (keys (select-keys m sql-ks))))
           f-sql (string/replace sql #":\w+" "?")
           s-vec (vec (concat [f-sql] params))]
       (if (empty? diff)
