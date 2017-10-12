@@ -52,20 +52,22 @@ Then create a file to wire up your queries and you're done!
 
 (def db {:connection-uri "postgres://localhost:5432/your_project_db"})
 
+(def query (partial oksql/query db))
+
 (defn all []
-  (oksql/query :items/all))
+  (query :items/all))
 
 (defn fetch [id]
-  (oksql/query :items/fetch {:id id}))
+  (query :items/fetch {:id id}))
 
 (defn create [m]
-  (oksql/query :items/insert m))
+  (query :items/insert m))
 
 (defn update [id m]
-  (oksql/query :items/update (merge {:id id} m)))
+  (query :items/update (merge {:id id} m)))
 
 (defn delete [id]
-  (oksql/delete :items/delete {:id id}))
+  (delete :items/delete {:id id}))
 ```
 
 A real advantage to this code (which can be generated statically) over the alternatives is that
