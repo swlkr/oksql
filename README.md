@@ -4,7 +4,7 @@ oksql is a library for using postgres sql.
 
 ## Usage
 
-Add `[oksql "1.0.0"]` to your `:dependencies` in your `project.clj`
+Add `[oksql "1.0.1"]` to your `:dependencies` in your `project.clj`
 
 Create a `.sql` file in your `resources/sql` folder like this one for example:
 
@@ -148,7 +148,7 @@ It also added some stuff that I didn't really need:
 I also really didn't like the idea that I couldn't "go to definition" with `defqueries` since it generated the functions with a macro. I'd rather just take a page from rails' book and generate the code statically and have it sitting in files, at least then it's easy to see and change it later. So those are the main differences from yesql, hugsql, and jeesql:
 
 - No defqueries macro
-- Simple row-fn (`-- f: first`) support and that's it
+- Simple results fn support (`-- fn: first`) support and that's it
 - No symbolic representation of `returning *`, just declare it explicitly
 
 ## TODO
