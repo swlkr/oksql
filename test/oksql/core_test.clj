@@ -3,6 +3,7 @@
             [oksql.core :refer :all]
             [clojure.string :as string]
             [clojure.java.jdbc :as jdbc])
+  (:refer-clojure :exclude [update])
   (:import (java.util UUID Date)
            (java.sql Timestamp)))
 
@@ -29,25 +30,48 @@
       (.addBatch s sql)
       (seq (.executeBatch s)))))
 
-(deftest query-test
-  (let [conn {:connection-uri "jdbc:postgresql://localhost:5432/template1"}
-        _ (exec conn "drop database if exists oksql_test")
-        _ (exec conn "create database oksql_test")
-        _ (exec conn "drop table if exists items")
-        _ (exec conn "create table items (id uuid, name text, created_at timestamp)")
-        db {:connection-uri "jdbc:postgresql://localhost:5432/oksql_test"}]
+(let [conn {:connection-uri "jdbc:postgresql://localhost:5432/postgres"}
+      _ (exec conn "drop database if exists oksql_test")
+      _ (exec conn "create database oksql_test")
+      _ (exec conn "drop table if exists items")
+      _ (exec conn "create table items (id serial primary key, name text, created_at timestamp)")
+      db {:connection-uri "jdbc:postgresql://localhost:5432/oksql_test"}
+      created_at (Timestamp. (.getTime (new Date)))]
 
+  (deftest query-test
     (testing "all"
       (is (= '() (query db :items/all))))
 
     (testing "fetch"
-      (is (= '() (query db :items/fetch {:id (UUID/randomUUID)}))))
+      (is (= '() (query db :items/fetch {:id 123}))))
 
     (testing "missing name"
       (is (= '() (query db :items/missing {:id 123}))))
 
     (testing "insert returning"
-      (let [expected {:id (UUID/randomUUID)
+      (let [expected {:id 1
                       :name "name"
-                      :created_at (Timestamp. (.getTime (new Date)))}]
-        (is (= expected (query db :items/insert expected)))))))
+                      :created_at created_at}]
+        (is (= expected (query db :items/insert expected)))))
+
+    (testing "select recently inserted"
+      (is (= {:id 1 :name "name" :created_at created_at} (query db :items/fetch {:id 1})))))
+
+  (deftest write-test
+    (testing "delete"
+      (let [expected {:id 1
+                      :name "name"
+                      :created_at created_at}]
+        (is (= expected (delete db :items :items/where {:id 1})))))
+
+    (testing "insert"
+      (let [expected {:id 1
+                      :name "hello"
+                      :created_at created_at}]
+        (is (= expected (insert db :items expected)))))
+
+    (testing "update"
+      (let [expected {:id 1
+                      :name "world"
+                      :created_at created_at}]
+        (is (= expected (update db :items {:name "world"} :items/where {:id 1})))))))

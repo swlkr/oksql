@@ -30,7 +30,7 @@ returning *
 -- name: update
 -- fn: first
 update items
-set name = :name
+set name = :name, alias = :alias
 where id = :id
 returning *
 
@@ -38,5 +38,7 @@ returning *
 -- fn: first
 delete
 from items
+
+-- name: where
 where id = :id
 returning *

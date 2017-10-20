@@ -111,6 +111,49 @@ A good example of this:
     (oksql/query :items/insert m)))
 ```
 
+So I know what you're thinking, man that sucks to keep the super simple write sql parts (insert/update/delete)
+in sync every time I make a change to a table. Well.
+
+```clojure
+; namespace keyword corresponds to db schema name
+; public by default, just like postgres
+(oksql/update db :public/items 123 {:name "update name"})
+
+(oksql/insert db :items {:name "new item"})
+
+(oksql/delete db :items 123)
+```
+
+So to review, oksql is kind of an ORM now, but not really! Only for writes if you want them.
+
+You still have the full power of sql at your disposal, but for writing, it's kind of unnecessary.
+Here are the four functions again:
+
+```clojure
+(ns your-project.models.items
+  (:require [oksql.core :as oksql])
+  (:refer-clojure :exclude [update]))
+
+(def db {:connection-uri "postgres://localhost:5432/your_project_db"})
+
+(def query (partial oksql/query db))
+
+(defn all []
+  (query :items/all))
+
+(defn fetch [id]
+  (query :items/fetch {:id id}))
+
+(defn create [m]
+  (oksql/insert db :items m))
+
+(defn update [id m]
+  (oksql/update db :items m :items/where {:id id}))
+
+(defn delete [id]
+  (oksql/delete db :items :items/where {:id id}))
+```
+
 ## Why
 
 The default for interacting with postgres from clojure without a library looks like this
