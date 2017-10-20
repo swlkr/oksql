@@ -67,7 +67,7 @@ Then create a file to wire up your queries and you're done!
   (query :items/update (merge {:id id} m)))
 
 (defn delete [id]
-  (delete :items/delete {:id id}))
+  (query :items/delete {:id id}))
 ```
 
 A real advantage to this code (which can be generated statically) over the alternatives is that
