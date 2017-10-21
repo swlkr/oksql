@@ -21,8 +21,9 @@
   (slurp (io/resource (str "sql/" s))))
 
 (defn db-query [db v]
-  (when v
-    (jdbc/query db v)))
+  (when (not (nil? v))
+    (jdbc/with-db-connection [conn db]
+      (jdbc/query conn v))))
 
 (defn part
   ([k m]
@@ -56,7 +57,7 @@
         vars-str (string/join ", " vars)
         sql (str "insert into " schema "." table " (" col-str ") values (" vars-str ") returning *")
         sql-params (sql-vec sql m)]
-    (first (jdbc/query db sql-params))))
+    (first (db-query db sql-params))))
 
 (defn update [db k m where where-map]
   (let [table (name k)
@@ -67,7 +68,7 @@
         col-str (string/join ", " cols)
         sql (str "update " schema "." table " set " col-str " " sql)
         sql-params (sql-vec sql (merge m where-map))]
-    (first (jdbc/query db sql-params))))
+    (first (db-query db sql-params))))
 
 (defn delete [db k where where-map]
   (let [table (name k)
@@ -75,4 +76,4 @@
         {:keys [sql f]} (part where)
         sql (str "delete from " schema "." table " " sql)
         sql-params (sql-vec sql where-map)]
-    (first (jdbc/query db sql-params))))
+    (first (db-query db sql-params))))
