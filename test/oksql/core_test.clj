@@ -36,7 +36,7 @@
       _ (exec conn "drop table if exists items")
       _ (exec conn "create table items (id serial primary key, name text, created_at timestamp)")
       db {:connection-uri "jdbc:postgresql://localhost:5432/oksql_test"}
-      created_at (Timestamp. (.getTime (new Date)))]
+      created-at (Timestamp. (.getTime (new Date)))]
 
   (deftest query-test
     (testing "all"
@@ -51,27 +51,27 @@
     (testing "insert returning"
       (let [expected {:id 1
                       :name "name"
-                      :created_at created_at}]
+                      :created-at created-at}]
         (is (= expected (query db :items/insert expected)))))
 
     (testing "select recently inserted"
-      (is (= {:id 1 :name "name" :created_at created_at} (query db :items/fetch {:id 1})))))
+      (is (= {:id 1 :name "name" :created-at created-at} (query db :items/fetch {:id 1})))))
 
   (deftest write-test
     (testing "delete"
       (let [expected {:id 1
                       :name "name"
-                      :created_at created_at}]
+                      :created-at created-at}]
         (is (= expected (delete db :items :items/where {:id 1})))))
 
     (testing "insert"
       (let [expected {:id 1
                       :name "hello"
-                      :created_at created_at}]
+                      :created-at created-at}]
         (is (= expected (insert db :items expected)))))
 
     (testing "update"
       (let [expected {:id 1
                       :name "world"
-                      :created_at created_at}]
+                      :created-at created-at}]
         (is (= expected (update db :items {:name "world"} :items/where {:id 1})))))))
