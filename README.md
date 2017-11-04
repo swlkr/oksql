@@ -60,8 +60,9 @@ Then create a file to wire up your queries and you're done!
 (defn fetch [id]
   (query :items/fetch {:id id}))
 
-(defn create [m]
-  (query :items/insert m))
+(defn create [{:keys [name created-at]}]
+  (query :items/insert {:name name
+                        :created-at created-at})) ; implicit! kebab -> snake case
 
 (defn update [id m]
   (query :items/update (merge {:id id} m)))
