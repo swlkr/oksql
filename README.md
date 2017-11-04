@@ -25,7 +25,7 @@ order by created_at desc
 -- name: insert
 -- fn: first
 insert into items (id, name, created_at)
-values (:id, :name, :created-at) -- kebab case -> snake case automatically
+values (:id, :name, :created_at)
 returning *
 
 -- name: update
