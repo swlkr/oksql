@@ -81,7 +81,9 @@ A good example of this:
   (:require [oksql.core :as oksql]))
 
 (defn validate [user]
-  true)
+  (if (contains? user :email)
+    user
+    (throw (Exception. "Email required"))))
 
 (defn insert [m]
   (let [user (validate m)]
