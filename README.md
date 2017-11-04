@@ -1,10 +1,10 @@
 # oksql
 
-oksql is a library for using postgres sql.
+oksql is a library for using postgres.
 
 ## Usage
 
-Add `[oksql "1.0.1"]` to your `:dependencies` in your `project.clj`
+Add `[oksql "1.2.0"]` to your `:dependencies` in your `project.clj`
 
 Create a `.sql` file in your `resources/sql` folder like this one for example:
 
@@ -25,7 +25,7 @@ order by created_at desc
 -- name: insert
 -- fn: first
 insert into items (id, name, created_at)
-values (:id, :name, :created_at)
+values (:id, :name, :created-at) -- kebab case -> snake case automatically
 returning *
 
 -- name: update
@@ -80,31 +80,8 @@ A good example of this:
 (ns your-project.models.users
   (:require [oksql.core :as oksql]))
 
-(defn email? [str]
-  (and
-    (string? str)
-    (some? (re-find #".+@.+\." str))))
-
-(defn validate-email [{:keys [email] :as user}]
-  (if (email? email)
-    user
-    (throw (Exception. "That's not an email"))))
-
-(defn validate-password [{:keys [password] :as user}]
-  (if (decent-password? password)
-    user
-    (throw (Exception. "Passwords need to be at least 12 characters"))))
-
-(defn validate-matching-passwords [{:keys [password confirm-password] :as user}]
-  (if (= password confirm-password)
-    user
-    (throw (Exception. "Passwords need to match"))))
-
-(defn validate [{:keys [email password confirm-password] :as user}]
-  (-> user
-    validate-email
-    validate-password
-    validate-matching-passwords))
+(defn validate [user]
+  true)
 
 (defn insert [m]
   (let [user (validate m)]
@@ -117,11 +94,11 @@ in sync every time I make a change to a table. Well.
 ```clojure
 ; namespace keyword corresponds to db schema name
 ; public by default, just like postgres
-(oksql/update db :public/items 123 {:name "update name"})
+(oksql/update db :items {:name "update name"} :items/where {:id 123})
 
 (oksql/insert db :items {:name "new item"})
 
-(oksql/delete db :items 123)
+(oksql/delete db :items :items/where {:id 123})
 ```
 
 So to review, oksql is kind of an ORM now, but not really! Only for writes if you want them.
@@ -193,6 +170,7 @@ I also really didn't like the idea that I couldn't "go to definition" with `defq
 - No defqueries macro
 - Simple results fn support (`-- fn: first`) support and that's it
 - No symbolic representation of `returning *`, just declare it explicitly
+- Implicit! Conversion of snake case to kebab case to and from the database!
 
 ## TODO
 
