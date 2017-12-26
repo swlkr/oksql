@@ -41,7 +41,11 @@
         (throw (Exception. (str "Parameter mismatch. Expected " (string/join ", " (map kebab sql-ks)) ". Got " (string/join ", " (map kebab (keys m))))))))))
 
 (defn get-lines [s]
-  (slurp (io/resource (str "sql/" s))))
+  (let [s (string/replace s "-" "_")
+        resource (io/resource (str "sql/" s))]
+    (if (nil? resource)
+      (throw (Exception. (str s " doesn't exist!")))
+      (slurp resource))))
 
 (defn db-query
   ([db sql-vec]
@@ -58,9 +62,15 @@
   ([k]
    (part k {})))
 
+(defn schema-table [k]
+  (let [k (snake k)
+        schema (or (namespace k) "public")
+        table (name k)]
+    (str schema "." table)))
+
 (defn query
   ([db k m]
-   (if (and (some? k)
+   (if (and (keyword? k)
             (some? (namespace k))
             (some? (name k)))
      (let [{:keys [sql f]} (part k m)
@@ -73,36 +83,34 @@
    (query db k {})))
 
 (defn insert [db k m]
-  (let [table (name k)
-        schema (or (namespace k) "public")
-        m (snake-case m)
+  (let [m (snake-case m)
         cols (->> (keys m)
-                  (map name))
-        col-str (string/join ", " cols)
-        vars (map #(str %) (keys m))
-        vars-str (string/join ", " vars)
-        sql (str "insert into " schema "." table " (" col-str ") values (" vars-str ") returning *")
+                  (map name)
+                  (string/join ", "))
+        vars (->> (map str (keys m))
+                  (string/join ", "))
+        sql (str "insert into " (schema-table k) " (" cols ") values (" vars ") returning *")
         sql-params (sql-vec sql m)]
     (first (db-query db sql-params))))
 
 (defn update [db k m where where-map]
-  (let [table (name k)
-        schema (or (namespace k) "public")
-        m (snake-case m)
+  (let [m (snake-case m)
         where-map (snake-case where-map)
-        {:keys [sql f]} (part where)
+        {:keys [sql]} (part where)
         cols (->> (keys m)
-                  (map #(str (name %) " = " (str %))))
-        col-str (string/join ", " cols)
-        sql (str "update " schema "." table " set " col-str " " sql)
-        sql-params (sql-vec sql (merge m where-map))]
-    (first (db-query db sql-params))))
+                  (map #(str (name %) " = " (str %)))
+                  (string/join ", "))
+        update-sql-vec (-> (str "update " (schema-table k) " set " cols " ")
+                           (sql-vec m))
+        where-sql-vec (sql-vec sql where-map)
+        update-sql (string/join " " [(first update-sql-vec) (first where-sql-vec)])
+        where-sql [(second update-sql-vec) (second where-sql-vec)]
+        sql (vec (flatten [update-sql where-sql]))]
+    (first (db-query db sql))))
 
 (defn delete [db k where where-map]
-  (let [table (name k)
-        schema (or (namespace k) "public")
-        where-map (snake-case where-map)
-        {:keys [sql f]} (part where)
-        sql (str "delete from " schema "." table " " sql)
+  (let [where-map (snake-case where-map)
+        {:keys [sql]} (part where)
+        sql (str "delete from " (schema-table k) " " sql)
         sql-params (sql-vec sql where-map)]
     (first (db-query db sql-params))))

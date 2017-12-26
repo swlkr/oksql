@@ -33,9 +33,11 @@
 (let [conn {:connection-uri "jdbc:postgresql://localhost:5432/postgres"}
       _ (exec conn "drop database if exists oksql_test")
       _ (exec conn "create database oksql_test")
-      _ (exec conn "drop table if exists items")
-      _ (exec conn "create table items (id serial primary key, name text, created_at timestamp)")
       db {:connection-uri "jdbc:postgresql://localhost:5432/oksql_test"}
+      _ (exec db "drop table if exists items")
+      _ (exec db "create table items (id serial primary key, name text, created_at timestamp)")
+      _ (exec db "drop table if exists foo_bar")
+      _ (exec db "create table foo_bar (name text)")
       created-at (Timestamp. (.getTime (new Date)))]
 
   (deftest query-test
@@ -74,4 +76,19 @@
       (let [expected {:id 1
                       :name "world"
                       :created-at created-at}]
-        (is (= expected (update db :items {:name "world"} :items/where {:id 1})))))))
+        (is (= expected (update db :items {:name "world"} :items/where {:id 1}))))))
+
+  (deftest snake-case-table-test
+    (testing "insert"
+      (let [expected {:name "insert me"}]
+        (is (= expected (insert db :foo-bar expected)))))
+
+    (testing "delete"
+      (let [_ (insert db :foo-bar {:name "delete me"})
+            expected {:name "delete me"}]
+        (is (= expected (delete db :foo-bar :foo-bar/where expected)))))
+
+    (testing "update"
+      (let [_ (insert db :foo-bar {:name "update me"})
+            expected {:name "updated me"}]
+        (is (= expected (update db :foo-bar {:name "updated me"} :foo-bar/where {:name "update me"})))))))
