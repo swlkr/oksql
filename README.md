@@ -4,7 +4,7 @@ oksql is a library for using postgres.
 
 ## Usage
 
-Add `[oksql "1.2.0"]` to your `:dependencies` in your `project.clj`
+Add `[oksql "1.2.1"]` to your `:dependencies` in your `project.clj`
 
 Create a `.sql` file in your `resources/sql` folder like this one for example:
 
@@ -157,18 +157,18 @@ So you might graduate to something like this
 It's a lot nicer syntactically, but you're now writing a sql dsl, not sql. So you have to know not only sql
 but a clojure sql dsl which will eventually [not have the thing you're looking for](https://github.com/korma/Korma/issues/379).
 
-So, fed up with these things and probably more, [yesql](https://github.com/krisajenkins/yesql) was born. Yesql basically solved my problems as well and I've been using it for the past two years on all of my projects. There are a few problems with yesql outlined in a fork here, [jeesql](https://github.com/tatut/jeesql).
+So, fed up with these things and probably more, [yesql](https://github.com/krisajenkins/yesql) was born. Yesql basically solved my problems and I've been using it for the past two years on all of my projects. There are a few problems with yesql outlined in a fork here, [jeesql](https://github.com/tatut/jeesql).
 
-Now jeesql solved my problems with yesql:
+jeesql solved most of my problems with yesql:
 
-- Instaparse dependency
+- No instaparse dependency
 - No way to specify that you just want a single row
 
-It also added some stuff that I didn't really need:
+Unfortunately it added some stuff that I didn't really need:
 - Positional arguments
 - Various query attributes
 
-I also really didn't like the idea that I couldn't "go to definition" with `defqueries` since it generated the functions with a macro. I'd rather just take a page from rails' book and generate the code statically and have it sitting in files, at least then it's easy to see and change it later. So those are the main differences from yesql, hugsql, and jeesql:
+I also didn't like that I couldn't "go to definition" with `defqueries` since it generated the functions with a macro. I'd rather just take a page from rails' book and generate the code statically and have it sitting in files, at least then it's easy to see and change it later. So those are the main differences from yesql, hugsql, and jeesql:
 
 - No defqueries macro
 - Simple results fn support (`-- fn: first`) support and that's it
