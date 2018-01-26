@@ -6,6 +6,8 @@
             [clojure.walk :as walk])
   (:refer-clojure :exclude [update]))
 
+(def qualified-keyword-pattern #":([\w-\.]+/?[\w-\.]+)Z?")
+
 (defn kebab [k]
   (if (keyword? k)
     (let [s (string/replace (str k) #"^:" "")
@@ -26,16 +28,26 @@
 (defn snake-case [m]
   (walk/postwalk snake m))
 
+(defn parameterize [s m]
+  (string/replace s qualified-keyword-pattern (fn [[_ s]]
+                                                (let [k (keyword s)
+                                                      v (get m k)]
+                                                  (if (coll? v)
+                                                    (->> (map (fn [_] (str "?")) v)
+                                                         (string/join ","))
+                                                    "?")))))
+
 (defn sql-vec [sql m]
   (when (and (string? sql)
              (map? m))
     (let [m (snake-case m)
-          sql-ks (mapv #(-> % second keyword) (re-seq #":(\w+)" sql))
+          sql-ks (mapv #(-> % second keyword) (re-seq qualified-keyword-pattern sql))
           sql-ks (mapv snake sql-ks)
           params (map #(get m %) sql-ks)
           diff (clojure.set/difference (set sql-ks) (set (keys (select-keys m sql-ks))))
-          f-sql (string/replace sql #":\w+" "?")
-          s-vec (vec (concat [f-sql] params))]
+          f-sql (parameterize sql m)
+          s-vec (vec (concat [f-sql] (->> (map (fn [val] (if (coll? val) (flatten val) val)) params)
+                                          (flatten))))]
       (if (empty? diff)
         s-vec
         (throw (Exception. (str "Parameter mismatch. Expected " (string/join ", " (map kebab sql-ks)) ". Got " (string/join ", " (map kebab (keys m))))))))))

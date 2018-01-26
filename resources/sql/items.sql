@@ -42,3 +42,8 @@ from items
 -- name: where
 where id = :id
 returning *
+
+-- name: in
+select *
+from items
+where id in (:ids)
