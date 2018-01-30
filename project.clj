@@ -1,4 +1,4 @@
-(defproject oksql "1.3.0"
+(defproject oksql "1.3.1"
   :description "An easy clojure postgres library"
   :url "https://github.com/swlkr/oksql"
   :license {:name "Eclipse Public License"
