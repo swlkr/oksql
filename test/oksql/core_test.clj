@@ -39,10 +39,15 @@
       _ (exec conn "create database oksql_test")
       db {:connection-uri "jdbc:postgresql://localhost:5432/oksql_test"}
       _ (exec db "drop table if exists items")
-      _ (exec db "create table items (id serial primary key, name text, created_at timestamp)")
+      _ (exec db "create table items (id serial primary key, name text, status text, checked boolean, created_at timestamp)")
       _ (exec db "drop table if exists foo_bar")
       _ (exec db "create table foo_bar (name text)")
-      created-at (Timestamp. (.getTime (new Date)))]
+      created-at (Timestamp. (.getTime (new Date)))
+      expected {:id 1
+                :name "name"
+                :created-at created-at
+                :status "pending"
+                :checked true}]
 
   (deftest query-test
     (testing "all"
@@ -55,32 +60,24 @@
       (is (= '() (query db :items/missing {:id 123}))))
 
     (testing "insert returning"
-      (let [expected {:id 1
-                      :name "name"
-                      :created-at created-at}]
-        (is (= expected (query db :items/insert expected)))))
+      (is (= expected (query db :items/insert expected))))
 
     (testing "select recently inserted"
-      (is (= {:id 1 :name "name" :created-at created-at} (query db :items/fetch {:id 1})))))
+      (is (= expected (query db :items/fetch {:id 1})))))
 
   (deftest write-test
     (testing "delete"
-      (let [expected {:id 1
-                      :name "name"
-                      :created-at created-at}]
-        (is (= expected (delete db :items :items/where {:id 1})))))
+      (is (= expected (delete db :items :items/where {:id 1}))))
 
     (testing "insert"
-      (let [expected {:id 1
-                      :name "hello"
-                      :created-at created-at}]
+      (let [expected (assoc expected :name "hello")]
         (is (= expected (insert db :items expected)))))
 
     (testing "update"
-      (let [expected {:id 1
-                      :name "world"
-                      :created-at created-at}]
-        (is (= expected (update db :items {:name "world"} :items/where {:id 1}))))))
+      (let [expected (assoc expected :name "world")]
+        (is (= expected (update db :items {:name "world"
+                                           :status "pending"
+                                           :checked true} :items/where {:id 1}))))))
 
   (deftest snake-case-table-test
     (testing "insert"

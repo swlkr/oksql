@@ -116,7 +116,7 @@
                            (sql-vec m))
         where-sql-vec (sql-vec sql where-map)
         update-sql (string/join " " [(first update-sql-vec) (first where-sql-vec)])
-        where-sql [(second update-sql-vec) (second where-sql-vec)]
+        where-sql [(rest update-sql-vec) (rest where-sql-vec)]
         sql (vec (flatten [update-sql where-sql]))]
     (first (db-query db sql))))
 

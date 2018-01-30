@@ -18,11 +18,15 @@ where id = :id
 insert into items (
   id,
   name,
+  status,
+  checked,
   created_at
 )
 values (
   :id,
   :name,
+  :status,
+  :checked,
   :created_at
 )
 returning *
