@@ -53,11 +53,13 @@
         (throw (Exception. (str "Parameter mismatch. Expected " (string/join ", " (map kebab sql-ks)) ". Got " (string/join ", " (map kebab (keys m))))))))))
 
 (defn get-lines [s]
-  (let [s (string/replace s "-" "_")
-        resource (io/resource (str "sql/" s))]
-    (if (nil? resource)
-      (throw (Exception. (str s " doesn't exist!")))
-      (slurp resource))))
+  (memoize
+   (fn [s]
+     (let [s (string/replace s "-" "_")
+           resource (io/resource (str "sql/" s))]
+       (if (nil? resource)
+         (throw (Exception. (str s " doesn't exist!")))
+         (slurp resource))))))
 
 (defn db-query
   ([db sql-vec]
