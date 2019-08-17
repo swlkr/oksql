@@ -1,0 +1,11 @@
+{:paths ["src"]
+ :deps {org.clojure/clojure {:mvn/version "1.8.0"}
+        org.postgresql/postgresql {:mvn/version "42.1.4"}
+        org.clojure/java.jdbc {:mvn/version "0.7.9"}}
+
+ :aliases {:repl {:jvm-opts ["-Dclojure.server.repl={:port,5556,:accept,clojure.core.server/repl}"]}
+
+           :test {:extra-paths ["test" "resources"]
+                  :main-opts ["-m" "cognitect.test-runner"]
+                  :extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                                                          :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}}}}}
