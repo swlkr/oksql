@@ -4,9 +4,13 @@ oksql is a library for using postgres.
 
 ## Usage
 
-Add `[oksql "1.2.1"]` to your `:dependencies` in your `project.clj`
+Add `[oksql "1.3.2"]` to your `:dependencies` in your `project.clj`
 
-Create a `.sql` file in your `resources/sql` folder like this one for example:
+*or*
+
+Add `oksql {:mvn/version "1.3.2"}` to your `deps.edn` file
+
+Then, create a `.sql` file in your `resources/sql` folder like this one for example:
 
 ```sql
 -- items.sql
@@ -50,7 +54,7 @@ Then create a file to wire up your queries and you're done!
   (:require [oksql.core :as oksql])
   (:refer-clojure :exclude [update]))
 
-(def db {:connection-uri "postgres://localhost:5432/your_project_db"})
+(def db {:connection-uri "jdbc:postgresql://localhost:5432/your_project_db"})
 
 (def query (partial oksql/query db))
 
@@ -114,7 +118,7 @@ Here are the four functions again:
   (:require [oksql.core :as oksql])
   (:refer-clojure :exclude [update]))
 
-(def db {:connection-uri "postgres://localhost:5432/your_project_db"})
+(def db {:connection-uri "jdbc:postgresql://localhost:5432/your_project_db"})
 
 (def query (partial oksql/query db))
 
@@ -139,7 +143,7 @@ Here are the four functions again:
 The default for interacting with postgres from clojure without a library looks like this
 
 ```clojure
-(def db {:connection-uri "postgres://localhost:5432/items_db})
+(def db {:connection-uri "jdbc:postgresql://localhost:5432/items_db"})
 (jdbc/query db ["select items.id, items.name, items.created_at from items where id = ?" 123])
 ```
 
@@ -174,12 +178,6 @@ I also didn't like that I couldn't "go to definition" with `defqueries` since it
 - Simple results fn support (`-- fn: first`) support and that's it
 - No symbolic representation of `returning *`, just declare it explicitly
 - Implicit! Conversion of snake case to kebab case to and from the database!
-
-## TODO
-
-- Configurable location for sql files?
-- Cache sql files
-- Automatic reloading of sql files
 
 ## Inspiration
 
